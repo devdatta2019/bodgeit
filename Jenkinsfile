@@ -35,7 +35,7 @@ podTemplate(yaml: '''
 ''') {
   node(POD_LABEL) {
     stage('Get a Maven project') {
-      git url: 'https://github.com/devdatta2019/bodgeit.git', branch: 'main'
+      git url: 'https://github.com/devdatta2019/bodgeit.git', branch: 'master'
       container('maven') {
         stage('Build a Maven project') {
           sh 'mvn package'
@@ -49,11 +49,11 @@ podTemplate(yaml: '''
       container('kaniko') {
         stage('Build a Go project') {
           sh '''
-            /kaniko/executor --context `pwd` --destination devdatta1987/hello-kaniko:1.4
+            /kaniko/executor --context `pwd` --destination devdatta1987/hello-kaniko:1.5
           '''
           }
         }
       }
    }
 }  
-© 2022 GitHub, Inc.
+
