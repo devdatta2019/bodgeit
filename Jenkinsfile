@@ -9,8 +9,8 @@ podTemplate(yaml: '''
         - sleep
         args:
         - 99d
-      - name: ubuntu
-        image: ubuntu:latest
+      - name: centos
+        image: centos:latest
         command:
         - sleep
         args:
@@ -35,7 +35,7 @@ podTemplate(yaml: '''
 ''') {
   node(POD_LABEL) {
     stage('Get a Maven project') {
-      git url: 'https://github.com/devdatta2019/bodgeit.git', branch: 'master'
+      git url: 'https://github.com/devdatta2019/spring-petclinic.git', branch: 'main'
       container('maven') {
         stage('Build a Maven project') {
           sh 'mvn package'
@@ -50,10 +50,35 @@ podTemplate(yaml: '''
         stage('Build a Go project') {
           sh '''
             /kaniko/executor --context `pwd` --destination devdatta1987/hello-kaniko:1.5
+            
           '''
           }
         }
       }
-   }
-}  
+  
+      stage('Scan report') {
+          container('centos') {
+              stage ('Prisma scan') {    
+              script {
+                  
+                  final String url="https://us-west1.cloud.twistlock.com/us-3-159181236//api/v1/scans/download?search=hello-kaniko:1.3"
+ 
+                  final String response = sh(script: "curl -k -u f04d752e-26fd-4c43-b4ec-0b1a96d60ad7:Fd541jRnVmlYnrsn3H0Onu+al28= $url", returnStdout: true).trim()
+              
+                  echo response
+              }
+          
+        }         
+  }
+   
+       stage('Deploy App') {
+              script {
+          kubernetesDeploy(configs: "deployment.yaml", kubeconfigId: "8037c112-c25b-4022-bb5d-6735abb45a31")
+        }
+      }
+    }    
+      
+      }
+      
 
+}
